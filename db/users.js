@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-catch */
 const client = require("./client");
-
+const bcrypt = require("bcrypt");
 // database functions
 
 // user functions
-async function createUser({ username }) {
+async function createUser({ username, password }) {
   // try {
   const SALT_COUNT = 10;
 
@@ -18,7 +18,7 @@ async function createUser({ username }) {
         ON CONFLICT (username) DO NOTHING
         RETURNING *;
       `,
-    [username]
+    [username, hashedPassword]
   );
 
   delete user.password;
