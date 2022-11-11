@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   createUser,
+  getUserByUsername,
   getUser,
   getUserById,
   getPublicRoutinesByUser,
@@ -19,7 +20,10 @@ router.post("/login", async (req, res, next) => {
 
     //getUser already checks for password match
     const user = await getUser({ username, password });
-
+    console.log(user);
+    if (!user) {
+      next({ message: "user does not exists" });
+    }
     // console.log(username, password);
     // console.log(user);
 
@@ -37,31 +41,121 @@ router.post("/login", async (req, res, next) => {
 });
 
 // POST /api/users/register
-
 router.post("/register", async (req, res, next) => {
+  const { username, password } = req.body;
+  // const userCheck = await createUser({
+  //   username,
+  //   password,
+  // });
   try {
-    const { username, password } = req.body;
-
     if (password.length < 8) {
-      throw new Error("password length must be at least 8 characters");
+      next({
+        name: "PasswordShortError",
+        message: `Password Too Short!`,
+        error: "Error!",
+      });
     }
 
-    const user = await createUser({ username, password });
-
-    //gonna try adding token to see if that fixes the problem...?
+    if (await getUserByUsername(username)) {
+      next({
+        name: "UserExistError",
+        message: `User ${username} is already taken.`,
+        error: "Error!",
+      });
+    }
+    const response = await createUser({ username, password });
+    // console.log(response);
     const token = jwt.sign(
-      { id: user.id, username: user.username },
-      JWT_SECRET
+      {
+        // id: user.id,
+        id: response.id,
+        // id: userCheck.id,
+        username,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1w" }
     );
 
-    // console.log({ user, token });
-
-    res.send({ user, token });
-    // res.send({ token });
+    res.send({
+      message: "Thank you for signing up",
+      token,
+      user: response,
+    });
   } catch (error) {
-    next(error);
+    next(error.message);
   }
 });
+//@@@@@@ test 2
+
+// router.post("/register", async (req, res, next) => {
+//   const { username, password } = req.body;
+//   const _user = await getUserByUsername(username);
+//   try {
+//     if (_user) {
+//       res.status(409);
+//       next({
+//         name: "UserExistsError",
+//         message: "A user by that username already exists",
+//       });
+//     } else if (password.length < 8) {
+//       res.status(411);
+//       next({
+//         name: "Password Error",
+//         message: "Password must be a minimum of 8 characters",
+//       });
+//     } else {
+//       const user = await createUser({
+//         username,
+//         password,
+//       });
+//       const token = jwt.sign(
+//         {
+//           id: user.id,
+//           username,
+//         },
+//         process.env.JWT_SECRET,
+//         {
+//           expiresIn: "1w",
+//         }
+//       );
+//       res.send({
+//         user,
+//         token,
+//       });
+//     }
+//   } catch ({ name, message }) {
+//     next({ name, message });
+//   }
+// });
+
+//@@@@@@ test 3
+// router.post("/register", async (req, res, next) => {
+//   try {
+//     const { username, password } = req.body;
+//     console.log(req.body);
+//     if (password.length < 8) {
+//       throw new Error("password length must be at least 8 characters");
+//     }
+//     const userCheck = await getUser({ username, password });
+//     if (!userCheck) {
+//       next({ message: "user already exists" });
+//     }
+//     const user = await createUser({ username, password });
+
+//     //gonna try adding token to see if that fixes the problem...?
+//     const token = jwt.sign(
+//       { id: user.id, username: user.username },
+//       JWT_SECRET
+//     );
+
+//     // console.log({ user, token });
+
+//     res.send({ user, token });
+//     // res.send({ token });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // GET /api/users/me
 

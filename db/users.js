@@ -21,39 +21,62 @@ async function createUser({ username, password }) {
     [username, hashedPassword]
   );
 
-  delete user.password;
-
+  //delete user.password;
+  // console.log(user);
   return user;
   // } catch (error) {
   //   throw error;
   // }
 }
 
-async function getUser({ username }) {
+async function getUser({ username, password }) {
   const savedUser = await getUserByUsername(username);
   const hashedPassword = savedUser.password;
-
-  if (passwordsMatch) {
-    try {
+  try {
+    if (bcrypt.compare(password, hashedPassword)) {
       const {
         rows: [user],
       } = await client.query(
         `
-        SELECT *
-        FROM users
-        WHERE username=$1
-      `,
+    SELECT *
+    FROM users
+    WHERE username = $1;
+    `,
         [username]
       );
-
-      delete user.password;
-
+      console.log(user);
       return user;
-    } catch (error) {
-      throw error;
     }
+  } catch (error) {
+    throw error;
   }
 }
+
+// async function getUser({ username, password }) {
+//   const savedUser = await getUserByUsername(username);
+//   const hashedPassword = savedUser.password;
+
+//   if (bcrypt.compare(password, hashedPassword)) {
+//     try {
+//       const {
+//         rows: [user],
+//       } = await client.query(
+//         `
+//         SELECT *
+//         FROM users
+//         WHERE username=$1
+//       `,
+//         [username]
+//       );
+
+//       delete user.password;
+
+//       return user;
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
+// }
 
 async function getUserById(userId) {
   try {

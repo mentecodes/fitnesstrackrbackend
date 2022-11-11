@@ -6,7 +6,7 @@ const { JWT_SECRET } = process.env;
 const app = express();
 
 // Setup your Middleware and API Router here
-
+app.use(express.json());
 app.use(async (req, res, next) => {
   const prefix = "Bearer ";
   const auth = req.header("Authorization");
