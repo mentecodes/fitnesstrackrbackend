@@ -1,7 +1,24 @@
+in api/activites, line 58
+1)be able to create a new activity, only if I am logged in
+
+in db/routines, line 177
+2)be able to create a new routine, only if I am logged in
+
+in api/activities.js line 15
+3)be able to update or delete a routine, only if I am logged in _as_
+the routine creator
+
+I have these two already in routine_activities respectively, not sure why it isn't working?
+
+4)be able to update the number of times or duration that an activity has in a certain routine, only if I am logged in _as_ the routine creator
+5)be able to remove an activity from a routine, only if I am logged in _as_ the routine creator
+
 # fitnesstrackr
+
 an API for our new fitness empire, FitnessTrac.kr, using node, express, and postgresql
 
 ## Getting Started
+
 Install Packages
 
     npm i
@@ -9,15 +26,16 @@ Install Packages
 Initialize Database
 
     createdb fitness-dev
-    
+
 Run Seed Script
-    
+
     npm run seed:dev
 
 ## Automated Tests
-**NOTE:**  At first, there will be too many errors for the tests to even run.  Start by running the seed:dev script above, until it is working.
 
-Once you get to running the tests, we recommend to start with just the DB test first, and move to API next.  This is because there will be so many errors in the beginning, it's hard to see what tests are passing or failing.
+**NOTE:** At first, there will be too many errors for the tests to even run. Start by running the seed:dev script above, until it is working.
+
+Once you get to running the tests, we recommend to start with just the DB test first, and move to API next. This is because there will be so many errors in the beginning, it's hard to see what tests are passing or failing.
 
 To run all the tests in watch mode (re-runs on code update), run
 
@@ -25,10 +43,8 @@ To run all the tests in watch mode (re-runs on code update), run
 
 ### DB Methods
 
-
     npm run test:watch db
 
 ### API Routes (server must be running for these to pass)
 
     npm run test:watch api
-

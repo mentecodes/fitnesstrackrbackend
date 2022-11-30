@@ -34,6 +34,8 @@ describe("DB Routine Activities", () => {
     fakeActivity = await createFakeActivity("Hockey", "On the ice");
     fakeRoutine = await createFakePublicRoutine(fakeUser.id, "Every night", "Until I make the team");
 
+    // console.log("AFLKJD\n" + fakeRoutine.id)
+
     routineActivityData = {
       routineId: fakeRoutine.id,
       activityId: fakeActivity.id,
@@ -44,7 +46,7 @@ describe("DB Routine Activities", () => {
 
   describe("getRoutineActivityById", () => {
     it("should return the routine activity by id", async () => {
-      const fakeRoutineActivity = await createFakeRoutineActivity()
+      const fakeRoutineActivity = await createFakeRoutineActivity()       
       const routineActivity = await getRoutineActivityById(
         fakeRoutineActivity.id
       )
@@ -72,6 +74,10 @@ describe("DB Routine Activities", () => {
         routineActivityData
       )
 
+    // console.log("2 " + routineActivity.routineId)
+   //  console.log("3 " + routineActivityData.routineId)
+   //  console.log("4 " + routineActivityData.activityId)
+    // console.log("5 " + routineActivity.activityId)
       expect(routineActivity.routineId).toBe(
         routineActivityData.routineId
       )

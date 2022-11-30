@@ -108,6 +108,9 @@ const createFakePublicRoutine = async (
     name,
     goal,
   });
+  
+  // console.log(routine)
+
   if (!routine) {
     throw new Error("createRoutine didn't return a routine");
   }
@@ -119,16 +122,20 @@ const createFakePrivateRoutine = async (
   name = faker.random.uuid(),
   goal = faker.random.uuid()
 ) => {
+  //console.log("GG")
   if (!creatorId) {
     const fakeUser = await createFakeUser();
     creatorId = fakeUser.id;
   }
+  //console.log("BEFORE")
   const routine = await createRoutine({
     creatorId,
     isPublic: false,
     name,
     goal,
   });
+  //console.log("AFTER")
+  //console.log(routine)
   if (!routine) {
     throw new Error("createRoutine didn't return a routine");
   }
@@ -143,6 +150,9 @@ const createFakeActivity = async (
     name,
     description
   });
+ // console.log("6 " + activity.id)
+ //console.log("6 " + activity.name)
+
   if (!activity) {
     throw new Error("createActivity didn't return an activity");
   }

@@ -1,25 +1,26 @@
-/* eslint-disable no-useless-catch */
-const client = require("./client");
+// const activities = require('./activities');
+const client = require('./client');
+// const { attachActivitiesToRoutines} = require('./activities');
+
+// const routines = require('./routines');
 
 async function getRoutineActivityById(id) {
   try {
-    const {
-      rows: [rouAct],
-    } = await client.query(
-      `
-        SELECT *
-        FROM routine_activities
-        WHERE id=$1
-    `,
-      [id]
-    );
-
-    return rouAct;
+    const { rows: [ routine_activity ]} = await client.query(`
+    SELECT *
+    FROM routine_activities
+    WHERE id=$1;
+    `, [id]);
+ // console.log(routine_activity)
+    return routine_activity;
   } catch (error) {
+    console.log('test error' + error)
     throw error;
   }
 }
 
+
+//removed the brackets around rows: routine_activity.  It did not call for an array
 async function addActivityToRoutine({
   routineId,
   activityId,
@@ -27,86 +28,88 @@ async function addActivityToRoutine({
   duration,
 }) {
   try {
-    const {
-      rows: [rouAct],
-    } = await client.query(
-      `
-        INSERT INTO routine_activities("routineId","activityId",count,duration)
-        VALUES($1,$2,$3,$4)
-        RETURNING *
-    `,
-      [routineId, activityId, count, duration]
-    );
+    const { rows: [ routine_activity ] } = await client.query(`
+    INSERT INTO routine_activities ("routineId", "activityId", count, duration)
+    VALUES($1, $2, $3, $4)
+    ON CONFLICT ("routineId", "activityId") DO NOTHING
+    RETURNING *; 
+    `, [routineId, activityId, count, duration]);
 
-    // console.log("you made it to line 49 in db function, addActivityToRoutine");
+  return routine_activity;
 
-    return rouAct;
   } catch (error) {
-    throw error;
+    console.log(error)
   }
 }
 
 async function getRoutineActivitiesByRoutine({ id }) {
   try {
-    const { rows: rouActs } = await client.query(
-      `
-        SELECT *
-        FROM routine_activities
-        WHERE "routineId" = $1
-    `,
-      [id]
-    );
-
-    return rouActs;
+    const { rows: routine_activity } = await client.query(`
+      SELECT * FROM routine_activities
+      WHERE "routineId"=$1;
+    `, [id]);
+    return routine_activity;
   } catch (error) {
+    console.log("Error getting routine activities by routine")
     throw error;
   }
 }
 
-async function updateRoutineActivity({ id, count, duration }) {
+async function updateRoutineActivity({ id, ...fields }) {
   try {
+    const indexString = Object.keys(fields).map((key, index) => {
+      return `"${key}"=$${index + 1}`;
+    });
     const {
-      rows: [rouAct],
+      rows: [routine_activity],
     } = await client.query(
       `
-        UPDATE routine_activities
-        SET count=$1,duration=$2
-        WHERE id=$3
-        RETURNING *
-      `,
-      [count, duration, id]
+      UPDATE routine_activities
+      SET ${indexString}
+      WHERE id=${id}
+      RETURNING *;`,
+      Object.values(fields)
     );
-
-    return rouAct;
-  } catch (error) {
-    throw error;
+    return routine_activity;
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
 }
 
+//removed brackets from rows: routine_activities
 async function destroyRoutineActivity(id) {
-  console.log("made it inside db function, destroyRoutineActivity");
-
   try {
-    const {
-      rows: [deletedRouAct],
-    } = await client.query(
-      `
-            DELETE FROM routine_activities 
-            WHERE id=$1
-            RETURNING *;
-        `,
-      [id]
-    );
+    const { rows: [ routine_activity ]} = await client.query(`
+    DELETE FROM routine_activities
+    WHERE id = $1
+    RETURNING *
+    `, [id]);
 
-    console.log("made it to line 99 of db function, destroyRoutineActivity");
-
-    return deletedRouAct;
+    return routine_activity;
   } catch (error) {
+    console.log("Error destroying routine activity")
     throw error;
   }
 }
 
-async function canEditRoutineActivity(routineActivityId, userId) {}
+async function canEditRoutineActivity(routineActivityId, userId) {
+  try {
+  const { rows: [routine_activities] } = await client.query(`
+    SELECT *
+    FROM routine_activities
+    JOIN routines ON routine_activities."routineId" = routines.id
+    WHERE "creatorId" = ${userId}
+    AND routine_activities.id = ${routineActivityId};
+    `, );
+    return routine_activities
+  } catch (error){
+    console.log(error)
+    throw error
+  }
+}
+
+  // return routine_activities.creatorId === userId;
 
 module.exports = {
   getRoutineActivityById,
@@ -115,4 +118,4 @@ module.exports = {
   updateRoutineActivity,
   destroyRoutineActivity,
   canEditRoutineActivity,
-};
+}
